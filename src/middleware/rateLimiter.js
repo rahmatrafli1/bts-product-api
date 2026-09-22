@@ -1,6 +1,9 @@
-import rateLimit from "express-rate-limit";
+import rateLimit, { ipKeyGenerator } from "express-rate-limit";
 
-// Untuk POST/PUT/DELETE products: max 1 request per 5 detik per IP
+const createKeyGenerator = (req) =>
+  `${ipKeyGenerator(req.ip)}-${req.originalUrl}`;
+
+// POST/PUT/DELETE products: maksimal 1 request per 5 detik per IP dan endpoint
 export const productMutationLimiter = rateLimit({
   windowMs: 5 * 1000,
   max: 1,
@@ -10,10 +13,10 @@ export const productMutationLimiter = rateLimit({
   },
   standardHeaders: true,
   legacyHeaders: false,
-  keyGenerator: (req) => `${req.ip}-${req.originalUrl}`,
+  keyGenerator: createKeyGenerator,
 });
 
-// Untuk auth register/login: max 3 request per 60 detik per IP
+// Register/login: maksimal 3 request per 60 detik per IP dan endpoint
 export const authLimiter = rateLimit({
   windowMs: 60 * 1000,
   max: 3,
@@ -23,5 +26,5 @@ export const authLimiter = rateLimit({
   },
   standardHeaders: true,
   legacyHeaders: false,
-  keyGenerator: (req) => `${req.ip}-${req.originalUrl}`,
+  keyGenerator: createKeyGenerator,
 });
