@@ -5,9 +5,34 @@ services:
     build: .
     container_name: bts-product-api
     ports:
-      - "3000:3000"
+      - "${PORT:-3000}:3000"
     env_file:
       - .env
-    volumes:
-      - ./data:/usr/src/app/data
+    environment:
+      DB_HOST: ${DB_HOST:-postgres}
+    depends_on:
+      postgres:
+        condition: service_healthy
     restart: unless-stopped
+
+  postgres:
+    image: postgres:16-alpine
+    container_name: bts-product-postgres
+    ports:
+      - "${DB_PORT:-5432}:5432"
+    environment:
+      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./database.sql:/docker-entrypoint-initdb.d/database.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
