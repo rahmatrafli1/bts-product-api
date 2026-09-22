@@ -1,4 +1,4 @@
-import { v4 as uuidv4 } from "uuid";
+import { randomUUID } from "node:crypto";
 import db from "../config/database.js";
 import cache from "../utils/cache.js";
 
@@ -118,7 +118,7 @@ export async function createProduct(req, res, next) {
       VALUES ($1, $2, $3, $4, $5, $6::jsonb, $7, $8, $7, $8)
       RETURNING *`,
       [
-        uuidv4(),
+        randomUUID(),
         title,
         price,
         description,

@@ -1,6 +1,6 @@
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
-import { v4 as uuidv4 } from "uuid";
+import { randomUUID } from "node:crypto";
 import db from "../config/database.js";
 
 function generateTokens(user) {
@@ -46,7 +46,7 @@ export async function register(req, res, next) {
       });
     }
 
-    const id = uuidv4();
+    const id = randomUUID();
     const hashedPassword = await bcrypt.hash(password, 10);
 
     await db.query(
