@@ -124,8 +124,9 @@ Content-Type: application/json
 
 ## Catatan Teknis
 
-- Data tersimpan pada `data/db.json` menggunakan `lowdb`.
+- Data disimpan di PostgreSQL.
+- Konfigurasi database menggunakan `DB_HOST`, `DB_PORT`, `DB_NAME`, `DB_USER`, dan `DB_PASSWORD` pada `.env`.
+- Jalankan `database.sql` terlebih dahulu untuk membuat tabel `users` dan `products`.
 - Password disimpan dalam bentuk hash menggunakan `bcryptjs`.
 - `JWT_SECRET` dan `JWT_REFRESH_SECRET` harus berbeda.
 - Jangan commit file `.env` atau membagikan JWT secret.
-- Folder `data/` diabaikan oleh `nodemon` agar server tidak restart berulang saat lowdb menyimpan data.

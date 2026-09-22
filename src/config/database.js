@@ -1,27 +1,17 @@
-import { createRequire } from "node:module";
-import path from "node:path";
-import fs from "node:fs";
-import { fileURLToPath } from "node:url";
+import pg from "pg";
 
-const require = createRequire(import.meta.url);
-const low = require("lowdb");
-const FileSync = require("lowdb/adapters/FileSync");
+const { Pool } = pg;
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+const pool = new Pool({
+  host: process.env.DB_HOST,
+  port: Number(process.env.DB_PORT || 5432),
+  database: process.env.DB_NAME,
+  user: process.env.DB_USER,
+  password: process.env.DB_PASSWORD,
+});
 
-const dataDir = path.join(__dirname, "../../data");
+pool.on("error", (error) => {
+  console.error("PostgreSQL connection error:", error.message);
+});
 
-if (!fs.existsSync(dataDir)) {
-  fs.mkdirSync(dataDir, { recursive: true });
-}
-
-const adapter = new FileSync(path.join(dataDir, "db.json"));
-const db = low(adapter);
-
-db.defaults({
-  products: [],
-  users: [],
-}).write();
-
-export default db;
+export default pool;
