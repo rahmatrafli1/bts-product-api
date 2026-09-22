@@ -1,0 +1,21 @@
+CREATE TABLE IF NOT EXISTS users (
+  id UUID PRIMARY KEY,
+  username VARCHAR(100) UNIQUE NOT NULL,
+  password VARCHAR(255) NOT NULL,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS products (
+  id UUID PRIMARY KEY,
+  title VARCHAR(255) NOT NULL,
+  price NUMERIC(12, 2) NOT NULL CHECK (price > 0),
+  description TEXT NOT NULL DEFAULT '',
+  category VARCHAR(100) NOT NULL,
+  images JSONB NOT NULL DEFAULT '[]'::jsonb,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  created_by VARCHAR(100) NOT NULL,
+  created_by_id UUID NOT NULL REFERENCES users(id),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  updated_by VARCHAR(100) NOT NULL,
+  updated_by_id UUID NOT NULL REFERENCES users(id)
+);
