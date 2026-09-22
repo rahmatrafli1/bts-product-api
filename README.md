@@ -1,45 +1,84 @@
 # BTS Product API
 
-REST API untuk manajemen produk dan autentikasi (Backend Developer Coding Test).
+REST API untuk manajemen produk dan autentikasi.
 
 ## Fitur
 
 - CRUD Produk (`/api/products`)
 - Register & Login dengan JWT (`/api/auth`)
-- Rate limiting (products mutation: 1x/5s, auth: 3x/60s)
-- Basic caching (60s TTL, in-memory node-cache)
-- CORS enabled (semua origin)
+- Rate limiting: product mutation 1x/5 detik, auth 3x/60 detik
+- Basic caching 60 detik
+- CORS enabled
 - Swagger docs di `/api-docs`
-- Menggunakan **ES Modules** (`"type": "module"`)
+- ES Modules (`"type": "module"`)
 
 ## Requirement
 
-- Node.js **>= 18.x** (disarankan LTS terbaru)
+- Node.js >= 18.x
 - npm >= 9.x
 
-## Menjalankan secara lokal
+## Instalasi dan Menjalankan Project
 
 ```powershell
 npm install
 copy .env.example .env
+```
+
+Buat nilai rahasia untuk JWT dengan menjalankan perintah berikut **dua kali**:
+
+```powershell
+node -e "console.log(require('crypto').randomBytes(64).toString('hex'))"
+```
+
+Masukkan hasilnya ke file `.env`:
+
+```env
+PORT=3000
+JWT_SECRET=hasil_generate_pertama
+JWT_REFRESH_SECRET=hasil_generate_kedua
+JWT_EXPIRES_IN=15m
+JWT_REFRESH_EXPIRES_IN=7d
+NODE_ENV=development
+```
+
+Jalankan development server:
+
+```powershell
 npm run dev
 ```
 
-## Menjalankan dengan Docker
+API berjalan pada `http://localhost:3000`.
+
+Swagger documentation: `http://localhost:3000/api-docs`
+
+## Docker
 
 ```powershell
 docker-compose up --build
 ```
 
-API akan berjalan di `http://localhost:3000`.
-Swagger docs: `http://localhost:3000/api-docs`
+## Endpoint
+
+| Method | Endpoint             |         Auth | Keterangan                |
+| ------ | -------------------- | -----------: | ------------------------- |
+| POST   | `/api/auth/register` |        Tidak | Register user             |
+| POST   | `/api/auth/login`    |        Tidak | Login dan mendapatkan JWT |
+| GET    | `/api/products`      |        Tidak | Daftar produk             |
+| GET    | `/api/products/:id`  |        Tidak | Detail produk             |
+| POST   | `/api/products`      | Bearer Token | Membuat produk            |
+| PUT    | `/api/products/:id`  | Bearer Token | Mengubah produk           |
+| DELETE | `/api/products/:id`  | Bearer Token | Menghapus produk          |
 
 ## Contoh Request
 
 ### Register
 
-```
+```http
 POST /api/auth/register
+Content-Type: application/json
+```
+
+```json
 {
   "username": "jhon_doe",
   "password": "supersecret",
@@ -49,21 +88,31 @@ POST /api/auth/register
 
 ### Login
 
-```
+```http
 POST /api/auth/login
+Content-Type: application/json
+```
+
+```json
 {
   "username": "jhon_doe",
   "password": "supersecret"
 }
 ```
 
-Response berisi `authentication_token` dan `refresh_token`.
+Response login berisi `authentication_token` dan `refresh_token`.
 
-### Create Product (perlu Bearer token)
+### Create Product
 
-```
+Gunakan `authentication_token` hasil login pada header:
+
+```http
 POST /api/products
 Authorization: Bearer <authentication_token>
+Content-Type: application/json
+```
+
+```json
 {
   "title": "Awesome T-Shirt",
   "price": 99.99,
@@ -75,6 +124,8 @@ Authorization: Bearer <authentication_token>
 
 ## Catatan Teknis
 
-- Data disimpan di `data/db.json` menggunakan `lowdb` (file-based JSON DB), otomatis dibuat saat pertama kali server dijalankan.
-- Password user di-hash menggunakan `bcryptjs` sebelum disimpan.
-- File `data/db.json` tidak di-commit ke git (lihat `.gitignore`).
+- Data tersimpan pada `data/db.json` menggunakan `lowdb`.
+- Password disimpan dalam bentuk hash menggunakan `bcryptjs`.
+- `JWT_SECRET` dan `JWT_REFRESH_SECRET` harus berbeda.
+- Jangan commit file `.env` atau membagikan JWT secret.
+- Folder `data/` diabaikan oleh `nodemon` agar server tidak restart berulang saat lowdb menyimpan data.
