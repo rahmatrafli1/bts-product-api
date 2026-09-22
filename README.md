@@ -39,6 +39,12 @@ JWT_REFRESH_SECRET=hasil_generate_kedua
 JWT_EXPIRES_IN=15m
 JWT_REFRESH_EXPIRES_IN=7d
 NODE_ENV=development
+
+DB_HOST=localhost
+DB_PORT=5432
+DB_NAME=bts_product_api
+DB_USER=postgres
+DB_PASSWORD=password_postgresql_anda
 ```
 
 Jalankan development server:
